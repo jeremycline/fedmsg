@@ -196,30 +196,44 @@ class FedmsgConsumer(moksha.hub.api.consumer.Consumer):
 
         self.log.info("Retrieved %i messages from datagrepper." % retrieved)
 
-    def get_datagrepper_results(self, then, now):
-        def _make_query(page=1):
-            return requests.get(self.datagrepper_url, params=dict(
-                rows_per_page=100, page=page, start=then, end=now, order='asc'
-            )).json()
+    def get_datagrepper_results(self, then, now, rows_per_page=100):
+        """
+        Retrieve all the messages datagrepper received between two given times.
 
-        # Grab the first page of results
-        data = _make_query()
+        Args:
+            then (int): The UTC start time to retrieve messages for in seconds since the epoch.
+            now (int): The UTC end time to retrieve messages for in seconds since the epoch.
+            rows_per_page (int): The number of messages per page.
 
-        # Grab and smash subsequent pages if there are any
+        Yields:
+            dict: Individual messages as Python dictionaries.
+        """
+        query_parameters = {
+            'rows_per_page': rows_per_page,
+            'page': 1,
+            'start': then,
+            'end': now,
+            'order': 'asc',
+        }
         interesting_topics = self.topic
         if not isinstance(interesting_topics, list):
             interesting_topics = [interesting_topics]
 
-        for page in range(1, data['pages'] + 1):
-            self.log.info("Retrieving datagrepper page %i of %i" % (
-                page, data['pages']))
-            data = _make_query(page=page)
-
-            for message in data['raw_messages']:
-                for topic in interesting_topics:
-                    if message['topic'].startswith(topic[:-1]):
+        query_pages = 1
+        try:
+            while query_parameters['page'] <= query_pages:
+                response = requests.get(self.datagrepper_url, params=query_parameters)
+                response.raise_for_status()
+                data = response.json()
+                for message in data['raw_messages']:
+                    if any(map(lambda t: message['topic'].startswith(t[:-1]), interesting_topics)):
                         yield message
-                        break
+                query_pages = data['pages']
+                query_parameters['page'] += 1
+                self.log.info("Retrieved datagrepper page %i of %i", query_parameters['page'],
+                              query_pages)
+        except requests.exceptions.RequestException:
+            pass
 
     def validate(self, message):
         """
