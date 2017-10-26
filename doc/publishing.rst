@@ -1,6 +1,50 @@
+.. _publishing:
+
 ==========
 Publishing
 ==========
+
+.. note:: This describes the new publishing API was added in fedmsg version 1.1.0.
+    For documentation on the deprecated approach, see :ref:`legacy-publishing`.
+
+Before you can publish messages, you need to start the fedmsg broker service.
+
+Fedmsg Broker
+=============
+
+The broker service binds a socket and clients submit messages to the service for
+publication. By default, the service uses the inter-process communication transport
+and is run on the same host as the clients, but it can also use TCP and run on a
+different host.
+
+The fedmsg broker can be started using the provided systemd unit files, or run
+in the foreground using::
+
+    $ fedmsg broker
+
+To change the broker configuration, either provide the configuration values using
+the command line interface's flags (use ``fedmsg broker --help`` for the list of
+available flags) or set the :ref:`broker-config` options in fedmsg's
+configuration files.
+
+
+Sending a Message
+=================
+
+Once the fedmsg broker is running, you should be able to publish message::
+
+    >>> from fedmsg.api import publish
+    >>> publish(u'demo.success', body={u'Hello': u'World!'})
+
+
+.. _legacy-publishing:
+
+Legacy Publishing
+=================
+
+.. warning:: The APIs described in this section have been deprecated and will be
+    removed in a future release. You should use the APIs described in
+    :ref:`publishing`.
 
 Before you start publishing messages, it is recommended that you call
 :func:`fedmsg.init`. This should be done from every Python thread you intend
