@@ -18,3 +18,6 @@ def cli():
     publish messages, and more.
     """
     pass
+
+
+from . import broker  # noqa

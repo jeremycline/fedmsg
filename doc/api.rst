@@ -11,10 +11,12 @@ on is not documented here, it may change without warning in a minor release.
 Python
 ======
 
+.. automodule:: fedmsg.api
+
 .. _api-send-receive:
 
 Sending and Receiving Messages
-------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: fedmsg
     :members: init, destroy, publish, tail_messages

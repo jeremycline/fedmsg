@@ -56,6 +56,7 @@ long_description = long_description.split('split here', 1)[1]
 f.close()
 
 install_requires = [
+    'appdirs',
     'pyzmq',
     'kitchen',
     'requests',

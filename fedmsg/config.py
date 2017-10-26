@@ -47,6 +47,7 @@ import sys
 import textwrap
 import warnings
 
+import appdirs
 import six
 
 from kitchen.iterutils import iterate
@@ -174,6 +175,16 @@ def _validate_bool(value):
 class FedmsgConfig(dict):
     _loaded = False
     _defaults = {
+        'submission_endpoint': {
+            'default': u'ipc://' + os.path.join(appdirs.user_data_dir('fedmsg', 'fedmsg'),
+                                                'submission.socket'),
+            'validator': _validate_none_or_type(six.text_type),
+        },
+        # A dictionary of publisher configuration dictionaries.
+        'publishers': {
+            'default': {'zmq': {'publish_endpoint': 'tcp://*:9940'}},
+            'validator': _validate_none_or_type(dict),
+        },
         'topic_prefix': {
             'default': u'com.example',
             'validator': _validate_none_or_type(six.text_type),
